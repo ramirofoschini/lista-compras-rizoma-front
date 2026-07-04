@@ -1,4 +1,4 @@
-// URL base de la API. En producción (Render) cambiá esta URL por la del backend.
+// Producción (usado por `ng build`). Apunta al backend en Render.
 export const environment = {
-  apiBase: 'http://localhost:8080/api',
+  apiBase: 'https://rizoma-lista-compra-backend.onrender.com/api',
 };

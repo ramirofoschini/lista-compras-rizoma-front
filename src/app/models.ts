@@ -9,6 +9,7 @@ export interface Presentacion {
 
 export interface Producto {
   id: number;
+  categoriaId: number;
   categoria: string;
   marca: string | null;
   nombre: string;
@@ -16,9 +17,18 @@ export interface Producto {
   presentaciones: Presentacion[];
 }
 
+// Catálogo agrupado (respuesta de /api/catalogo)
 export interface Categoria {
   nombre: string;
   productos: Producto[];
+}
+
+// Categoría suelta (para el desplegable y el ABM del admin)
+export interface CategoriaItem {
+  id: number;
+  nombre: string;
+  orden: number | null;
+  activa: boolean;
 }
 
 export interface Cliente {

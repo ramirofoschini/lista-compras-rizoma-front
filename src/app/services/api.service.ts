@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AppConfig, Categoria, CrearPedidoRequest, PedidoResponse, Producto } from '../models';
+import { AppConfig, Categoria, CategoriaItem, CrearPedidoRequest, PedidoResponse, Producto } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -16,6 +16,10 @@ export class ApiService {
 
   getConfig(): Observable<AppConfig> {
     return this.http.get<AppConfig>(`${this.base}/config`);
+  }
+
+  getCategorias(): Observable<CategoriaItem[]> {
+    return this.http.get<CategoriaItem[]>(`${this.base}/categorias`);
   }
 
   crearPedido(req: CrearPedidoRequest): Observable<PedidoResponse> {
@@ -46,5 +50,21 @@ export class ApiService {
     const form = new FormData();
     form.append('file', file);
     return this.http.post(`${this.base}/admin/import`, form, { headers: this.authHeaders(user, pass) });
+  }
+
+  // ---- Admin: categorías ----
+  adminListarCategorias(user: string, pass: string): Observable<CategoriaItem[]> {
+    return this.http.get<CategoriaItem[]>(`${this.base}/admin/categorias`, { headers: this.authHeaders(user, pass) });
+  }
+
+  adminGuardarCategoria(cat: unknown, user: string, pass: string, id?: number): Observable<CategoriaItem> {
+    const headers = this.authHeaders(user, pass);
+    return id
+      ? this.http.put<CategoriaItem>(`${this.base}/admin/categorias/${id}`, cat, { headers })
+      : this.http.post<CategoriaItem>(`${this.base}/admin/categorias`, cat, { headers });
+  }
+
+  adminDesactivarCategoria(id: number, user: string, pass: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/admin/categorias/${id}`, { headers: this.authHeaders(user, pass) });
   }
 }

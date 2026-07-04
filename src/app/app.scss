@@ -1,0 +1,92 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: var(--verde);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #fff;
+  text-decoration: none;
+
+  .logo {
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    strong {
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
+    }
+    small {
+      font-size: 0.68rem;
+      opacity: 0.85;
+    }
+  }
+}
+
+.stepper {
+  display: flex;
+  gap: 0.35rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+
+  .step {
+    font-size: 0.72rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+
+    &.active {
+      background: #fff;
+      color: var(--verde-osc);
+      font-weight: 600;
+    }
+    &.done {
+      background: rgba(255, 255, 255, 0.35);
+      color: #fff;
+    }
+  }
+}
+
+.cart-badge {
+  margin-left: 0.5rem;
+  background: #fff;
+  color: var(--verde-osc);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1rem 1rem 6rem;
+}
+
+@media (max-width: 560px) {
+  .stepper .step {
+    font-size: 0.66rem;
+    padding: 0.22rem 0.45rem;
+  }
+  .brand .brand-text small {
+    display: none;
+  }
+}

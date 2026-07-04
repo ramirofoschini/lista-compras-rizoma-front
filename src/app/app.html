@@ -1,0 +1,27 @@
+<header class="topbar">
+  <a routerLink="/" class="brand">
+    <span class="logo">🌱</span>
+    <span class="brand-text">
+      <strong>RIZOMA</strong>
+      <small>bio almacén orgánico</small>
+    </span>
+  </a>
+
+  @if (paso() > 0) {
+    <nav class="stepper" aria-label="Progreso del pedido">
+      <span class="step" [class.active]="paso() >= 1" [class.done]="paso() > 1">1 · Datos</span>
+      <span class="step" [class.active]="paso() >= 2" [class.done]="paso() > 2">2 · Productos</span>
+      <span class="step" [class.active]="paso() >= 3">3 · Pedido</span>
+    </nav>
+  }
+
+  @if (paso() === 2 && cart.count() > 0) {
+    <a routerLink="/resumen" class="cart-badge" aria-label="Ver pedido">
+      🛒 <span>{{ cart.count() }}</span>
+    </a>
+  }
+</header>
+
+<main class="page">
+  <router-outlet />
+</main>

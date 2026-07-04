@@ -47,22 +47,26 @@ interface Draft { id?: number; categoriaId: number | null; marca: string; nombre
         @if (importError()) { <div class="error">{{ importError() }}</div> }
       </section>
 
-      <!-- ABM de categorías -->
+      <!-- ABM de categorías (colapsable) -->
       <section class="card">
-        <h2>Categorías</h2>
-        <div class="cat-nueva">
-          <input placeholder="Nueva categoría" [ngModel]="nuevaCat()" (ngModelChange)="nuevaCat.set($event)" name="nuevaCat" />
-          <button class="btn btn-primary" (click)="crearCategoria()">+ Crear</button>
-        </div>
-        <div class="cat-head"><span>Nombre</span><span>Orden</span><span>Activa</span><span></span></div>
-        @for (c of categorias(); track c.id) {
-          <div class="cat-row">
-            <input [(ngModel)]="c.nombre" [name]="'cn' + c.id" />
-            <input type="number" [(ngModel)]="c.orden" [name]="'co' + c.id" />
-            <label class="chk"><input type="checkbox" [(ngModel)]="c.activa" [name]="'ca' + c.id" /></label>
-            <button class="btn btn-ghost" (click)="guardarCategoria(c)">Guardar</button>
+        <details class="cat-details">
+          <summary class="cat-summary">Categorías <span class="muted">({{ categorias().length }})</span></summary>
+          <div class="cat-body">
+            <div class="cat-nueva">
+              <input placeholder="Nueva categoría" [ngModel]="nuevaCat()" (ngModelChange)="nuevaCat.set($event)" name="nuevaCat" />
+              <button class="btn btn-primary" (click)="crearCategoria()">+ Crear</button>
+            </div>
+            <div class="cat-head"><span>Nombre</span><span>Orden</span><span>Activa</span><span></span></div>
+            @for (c of categorias(); track c.id) {
+              <div class="cat-row">
+                <input [(ngModel)]="c.nombre" [name]="'cn' + c.id" />
+                <input type="number" [(ngModel)]="c.orden" [name]="'co' + c.id" />
+                <label class="chk"><input type="checkbox" [(ngModel)]="c.activa" [name]="'ca' + c.id" /></label>
+                <button class="btn btn-ghost" (click)="guardarCategoria(c)">Guardar</button>
+              </div>
+            }
           </div>
-        }
+        </details>
       </section>
 
       <!-- Productos -->
@@ -130,11 +134,17 @@ interface Draft { id?: number; categoriaId: number | null; marca: string; nombre
     input[type="file"] { margin-bottom: 0.6rem; }
     .import-ok { margin-top: 0.6rem; color: var(--verde-osc); background: var(--verde-claro); padding: 0.6rem; border-radius: 8px; font-size: 0.9rem; }
     .error { color: #c0392b; margin-top: 0.5rem; font-size: 0.85rem; }
+    .cat-details summary { cursor: pointer; }
+    .cat-summary { font-size: 1.15rem; font-weight: 600; }
+    .cat-body { margin-top: 0.9rem; }
     .cat-nueva { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
     .cat-nueva input { flex: 1; }
-    .cat-head, .cat-row { display: grid; grid-template-columns: 1fr 80px 60px auto; gap: 0.5rem; align-items: center; }
+    .cat-head, .cat-row { display: grid; grid-template-columns: 1fr 80px 70px auto; gap: 0.5rem; align-items: center; }
     .cat-head { font-size: 0.75rem; color: var(--gris); font-weight: 600; margin-bottom: 0.3rem; }
+    .cat-head span:nth-child(2), .cat-head span:nth-child(3) { text-align: center; }
     .cat-row { margin-bottom: 0.4rem; }
+    .cat-row input[type="number"] { text-align: center; }
+    .cat-row .chk { justify-content: center; margin: 0; }
     .toolbar { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
     .toolbar input { flex: 1; }
     .prod-row { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; background: #fff; border: 1px solid var(--linea); border-radius: 10px; padding: 0.55rem 0.75rem; margin-bottom: 0.35rem; }

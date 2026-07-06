@@ -20,6 +20,7 @@ export interface Producto {
 // Catálogo agrupado (respuesta de /api/catalogo)
 export interface Categoria {
   nombre: string;
+  color: string | null;
   productos: Producto[];
 }
 
@@ -29,6 +30,7 @@ export interface CategoriaItem {
   nombre: string;
   orden: number | null;
   activa: boolean;
+  color: string | null;
 }
 
 export interface Cliente {

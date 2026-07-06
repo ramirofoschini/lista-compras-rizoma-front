@@ -54,13 +54,15 @@ interface Draft { id?: number; categoriaId: number | null; marca: string; nombre
           <div class="cat-body">
             <div class="cat-nueva">
               <input placeholder="Nueva categoría" [ngModel]="nuevaCat()" (ngModelChange)="nuevaCat.set($event)" name="nuevaCat" />
+              <input type="color" class="color-pick" [ngModel]="nuevaColor()" (ngModelChange)="nuevaColor.set($event)" name="nuevaColor" title="Color de la tarjeta" />
               <button class="btn btn-primary" (click)="crearCategoria()">+ Crear</button>
             </div>
-            <div class="cat-head"><span>Nombre</span><span>Orden</span><span>Activa</span><span></span></div>
+            <div class="cat-head"><span>Nombre</span><span>Orden</span><span>Color</span><span>Activa</span><span></span></div>
             @for (c of categorias(); track c.id) {
               <div class="cat-row">
                 <input [(ngModel)]="c.nombre" [name]="'cn' + c.id" />
                 <input type="number" [(ngModel)]="c.orden" [name]="'co' + c.id" />
+                <input type="color" class="color-pick" [ngModel]="c.color || '#4a7c59'" (ngModelChange)="c.color = $event" [name]="'ck' + c.id" title="Color de la tarjeta" />
                 <label class="chk"><input type="checkbox" [(ngModel)]="c.activa" [name]="'ca' + c.id" /></label>
                 <button class="btn btn-ghost" (click)="guardarCategoria(c)">Guardar</button>
               </div>
@@ -139,12 +141,13 @@ interface Draft { id?: number; categoriaId: number | null; marca: string; nombre
     .cat-body { margin-top: 0.9rem; }
     .cat-nueva { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
     .cat-nueva input { flex: 1; }
-    .cat-head, .cat-row { display: grid; grid-template-columns: 1fr 80px 70px auto; gap: 0.5rem; align-items: center; }
+    .cat-head, .cat-row { display: grid; grid-template-columns: 1fr 64px 48px 56px auto; gap: 0.5rem; align-items: center; }
     .cat-head { font-size: 0.75rem; color: var(--gris); font-weight: 600; margin-bottom: 0.3rem; }
-    .cat-head span:nth-child(2), .cat-head span:nth-child(3) { text-align: center; }
+    .cat-head span:nth-child(2), .cat-head span:nth-child(3), .cat-head span:nth-child(4) { text-align: center; }
     .cat-row { margin-bottom: 0.4rem; }
     .cat-row input[type="number"] { text-align: center; }
     .cat-row .chk { justify-content: center; margin: 0; }
+    .color-pick { width: 48px; height: 34px; padding: 2px; border: 1px solid var(--linea); border-radius: 8px; cursor: pointer; flex: none; }
     .toolbar { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
     .toolbar input { flex: 1; }
     .prod-row { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; background: #fff; border: 1px solid var(--linea); border-radius: 10px; padding: 0.55rem 0.75rem; margin-bottom: 0.35rem; }
@@ -173,6 +176,7 @@ export class Admin implements OnInit {
   productos = signal<Producto[]>([]);
   categorias = signal<CategoriaItem[]>([]);
   nuevaCat = signal('');
+  nuevaColor = signal('#4a7c59');
   filtro = signal('');
 
   archivo = signal<File | null>(null);
@@ -237,14 +241,14 @@ export class Admin implements OnInit {
   crearCategoria(): void {
     const nombre = this.nuevaCat().trim();
     if (!nombre) return;
-    this.api.adminGuardarCategoria({ nombre, activa: true }, this.user(), this.pass()).subscribe({
+    this.api.adminGuardarCategoria({ nombre, activa: true, color: this.nuevaColor() }, this.user(), this.pass()).subscribe({
       next: () => { this.nuevaCat.set(''); this.cargarCategorias(); },
       error: (e) => alert(e?.error?.message || 'No se pudo crear la categoría.'),
     });
   }
 
   guardarCategoria(c: CategoriaItem): void {
-    this.api.adminGuardarCategoria({ nombre: c.nombre, orden: c.orden, activa: c.activa }, this.user(), this.pass(), c.id).subscribe({
+    this.api.adminGuardarCategoria({ nombre: c.nombre, orden: c.orden, activa: c.activa, color: c.color }, this.user(), this.pass(), c.id).subscribe({
       next: () => this.cargarCategorias(),
       error: (e) => alert(e?.error?.message || 'No se pudo guardar la categoría.'),
     });

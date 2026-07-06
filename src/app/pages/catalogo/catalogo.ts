@@ -87,8 +87,8 @@ import { Categoria, Producto } from '../../models';
       <!-- Grilla de tarjetas de categoría -->
       <div class="cat-grid">
         @for (c of categorias(); track c.nombre) {
-          <button class="cat-card" (click)="categoriaSel.set(c.nombre)">
-            <span class="cat-nombre">{{ c.nombre }}</span>
+          <button class="cat-card" (click)="categoriaSel.set(c.nombre)" [style.border-left-color]="c.color || '#4a7c59'">
+            <span class="cat-nombre" [style.color]="c.color || '#3a6147'">{{ c.nombre }}</span>
             <span class="cat-count">{{ c.productos.length }} producto(s)</span>
           </button>
         } @empty {

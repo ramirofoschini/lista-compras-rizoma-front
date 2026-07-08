@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
-import { CategoriaItem, Producto } from '../../models';
+import { CategoriaItem, FolletoPreview, ImportResult, Producto } from '../../models';
 
 interface DraftPres { id?: number; etiqueta: string; precio: number | null; activo: boolean; }
 interface Draft { id?: number; categoriaId: number | null; marca: string; nombre: string; notas: string; activo: boolean; presentaciones: DraftPres[]; }
@@ -45,6 +45,37 @@ interface Draft { id?: number; categoriaId: number | null; marca: string; nombre
           </div>
         }
         @if (importError()) { <div class="error">{{ importError() }}</div> }
+      </section>
+
+      <!-- Importar folleto estilado (con previsualización) -->
+      <section class="card">
+        <h2>Importar folleto (con estilos)</h2>
+        <p class="muted">Subí el folleto de Rizoma tal cual. Primero previsualizás qué entendió y después confirmás.</p>
+        <input type="file" accept=".xlsx,.xls" (change)="onFolletoFile($event)" />
+        <button class="btn btn-ghost" [disabled]="!folletoFile() || folletoPreviewing()" (click)="previsualizarFolleto()">
+          {{ folletoPreviewing() ? 'Analizando…' : 'Previsualizar' }}
+        </button>
+
+        @if (folletoPreview(); as pv) {
+          <div class="fo-prev">
+            <p><strong>{{ pv.categorias }}</strong> categorías · <strong>{{ pv.productos }}</strong> productos · <strong>{{ pv.presentaciones }}</strong> presentaciones</p>
+            @if (pv.avisos.length) {
+              <details class="fo-avisos">
+                <summary>⚠️ {{ pv.avisos.length }} aviso(s) — revisá antes de confirmar</summary>
+                <ul>@for (a of pv.avisos; track a) { <li>{{ a }}</li> }</ul>
+              </details>
+            } @else {
+              <p class="fo-ok">Sin avisos ✓</p>
+            }
+            <button class="btn btn-primary" [disabled]="folletoImporting()" (click)="confirmarFolleto()">
+              {{ folletoImporting() ? 'Importando…' : 'Confirmar importación' }}
+            </button>
+          </div>
+        }
+        @if (folletoResult(); as r) {
+          <div class="import-ok">✓ {{ r.productosCreados }} creados, {{ r.productosActualizados }} actualizados, {{ r.presentaciones }} presentaciones.</div>
+        }
+        @if (folletoError()) { <div class="error">{{ folletoError() }}</div> }
       </section>
 
       <!-- ABM de categorías (colapsable) -->
@@ -136,6 +167,11 @@ interface Draft { id?: number; categoriaId: number | null; marca: string; nombre
     input[type="file"] { margin-bottom: 0.6rem; }
     .import-ok { margin-top: 0.6rem; color: var(--verde-osc); background: var(--verde-claro); padding: 0.6rem; border-radius: 8px; font-size: 0.9rem; }
     .error { color: #c0392b; margin-top: 0.5rem; font-size: 0.85rem; }
+    .fo-prev { margin-top: 0.7rem; border-top: 1px solid var(--linea); padding-top: 0.7rem; }
+    .fo-ok { color: var(--verde-osc); font-weight: 600; }
+    .fo-avisos { margin: 0.5rem 0; }
+    .fo-avisos summary { cursor: pointer; color: #b06a00; font-weight: 600; }
+    .fo-avisos ul { max-height: 220px; overflow: auto; font-size: 0.82rem; color: var(--gris); margin: 0.4rem 0; padding-left: 1.1rem; }
     .cat-details summary { cursor: pointer; }
     .cat-summary { font-size: 1.15rem; font-weight: 600; }
     .cat-body { margin-top: 0.9rem; }
@@ -183,6 +219,13 @@ export class Admin implements OnInit {
   importando = signal(false);
   importResult = signal<{ productosCreados: number; productosActualizados: number; presentaciones: number; avisos: string[] } | null>(null);
   importError = signal<string | null>(null);
+
+  folletoFile = signal<File | null>(null);
+  folletoPreview = signal<FolletoPreview | null>(null);
+  folletoPreviewing = signal(false);
+  folletoImporting = signal(false);
+  folletoResult = signal<ImportResult | null>(null);
+  folletoError = signal<string | null>(null);
 
   editando = signal<Producto | null>(null);
   draft: Draft = this.draftVacio();
@@ -268,6 +311,43 @@ export class Admin implements OnInit {
     this.api.adminImportar(f, this.user(), this.pass()).subscribe({
       next: (r: any) => { this.importResult.set(r); this.importando.set(false); this.cargar(); this.cargarCategorias(); },
       error: (e) => { this.importError.set(e?.error?.message || 'No se pudo importar el archivo.'); this.importando.set(false); },
+    });
+  }
+
+  onFolletoFile(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    this.folletoFile.set(input.files?.[0] ?? null);
+    this.folletoPreview.set(null);
+    this.folletoResult.set(null);
+    this.folletoError.set(null);
+  }
+
+  previsualizarFolleto(): void {
+    const f = this.folletoFile();
+    if (!f) return;
+    this.folletoPreviewing.set(true);
+    this.folletoError.set(null);
+    this.folletoResult.set(null);
+    this.api.adminPreviewFolleto(f, this.user(), this.pass()).subscribe({
+      next: (pv) => { this.folletoPreview.set(pv); this.folletoPreviewing.set(false); },
+      error: (e) => { this.folletoError.set(e?.error?.message || 'No se pudo analizar el folleto.'); this.folletoPreviewing.set(false); },
+    });
+  }
+
+  confirmarFolleto(): void {
+    const f = this.folletoFile();
+    if (!f) return;
+    this.folletoImporting.set(true);
+    this.folletoError.set(null);
+    this.api.adminImportarFolleto(f, this.user(), this.pass()).subscribe({
+      next: (r) => {
+        this.folletoResult.set(r);
+        this.folletoPreview.set(null);
+        this.folletoImporting.set(false);
+        this.cargar();
+        this.cargarCategorias();
+      },
+      error: (e) => { this.folletoError.set(e?.error?.message || 'No se pudo importar el folleto.'); this.folletoImporting.set(false); },
     });
   }
 

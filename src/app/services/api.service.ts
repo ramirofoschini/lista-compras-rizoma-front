@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AppConfig, Categoria, CategoriaItem, CrearPedidoRequest, PedidoResponse, Producto } from '../models';
+import { AppConfig, Categoria, CategoriaItem, CrearPedidoRequest, FolletoPreview, ImportResult, PedidoResponse, Producto } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -50,6 +50,18 @@ export class ApiService {
     const form = new FormData();
     form.append('file', file);
     return this.http.post(`${this.base}/admin/import`, form, { headers: this.authHeaders(user, pass) });
+  }
+
+  adminPreviewFolleto(file: File, user: string, pass: string): Observable<FolletoPreview> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<FolletoPreview>(`${this.base}/admin/import/folleto/preview`, form, { headers: this.authHeaders(user, pass) });
+  }
+
+  adminImportarFolleto(file: File, user: string, pass: string): Observable<ImportResult> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<ImportResult>(`${this.base}/admin/import/folleto`, form, { headers: this.authHeaders(user, pass) });
   }
 
   // ---- Admin: categorías ----

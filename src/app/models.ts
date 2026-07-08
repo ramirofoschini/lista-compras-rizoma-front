@@ -74,3 +74,26 @@ export interface AppConfig {
   diasEntrega: string[];
   horarioEntrega: string;
 }
+
+// Previsualización del folleto estilado (respuesta de /admin/import/folleto/preview)
+export interface FolletoPreview {
+  categorias: number;
+  marcas: number;
+  productos: number;
+  presentaciones: number;
+  items: {
+    categoria: string;
+    marca: string | null;
+    nombre: string;
+    presentaciones: { etiqueta: string | null; precio: number | null }[];
+    notas: string | null;
+  }[];
+  avisos: string[];
+}
+
+export interface ImportResult {
+  productosCreados: number;
+  productosActualizados: number;
+  presentaciones: number;
+  avisos: string[];
+}
